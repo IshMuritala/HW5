@@ -1,6 +1,10 @@
 /******************************************************************
  *
+<<<<<<< HEAD
  *   YOUR NAME / SECTION NUMBER
+=======
+ *   Ismail Muritala / Section: 001
+>>>>>>> 46e98be (Test1)
  *
  *   Note, additional comments provided throughout source code is
  *   for educational purposes.

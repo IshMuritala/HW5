@@ -1,6 +1,10 @@
 /******************************************************************
  *
+<<<<<<< HEAD
  *   YOUR NAME / SECTION NUMBER
+=======
+ *   Ismail Muritala / Section: 001
+>>>>>>> 46e98be (Test1)
  *
  *   This java file contains the problem solutions of isSubSet, findKthLargest,
  *   and sort2Arrays methods. You should utilize the Java Collection Framework for
