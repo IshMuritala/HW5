@@ -250,39 +250,53 @@ public class CuckooHash<K, V> {
 		K currKey = key;
 		V currValue = value;
 		int lastPos = hash1(currKey);
+		int rehashCount = 0;
+		int maxRehashes = 2;  // Limit number of rehashes
 
-		for (int i = 0; i < CAPACITY; i++) {
-			// Check for duplicate <key,value> pair first
-			if (table[lastPos] != null &&
-					table[lastPos].getBucKey().equals(currKey) &&
-					table[lastPos].getValue().equals(currValue)) {
-				return;
-			}
+		while (rehashCount <= maxRehashes) {
+			for (int i = 0; i < CAPACITY; i++) {
+				// Check for duplicate <key,value> pair first
+				if (table[lastPos] != null &&
+						table[lastPos].getBucKey().equals(currKey) &&
+						table[lastPos].getValue().equals(currValue)) {
+					return;
+				}
 
-			// If empty spot, place it
-			if (table[lastPos] == null) {
+				// If empty spot, place it
+				if (table[lastPos] == null) {
+					table[lastPos] = new Bucket<>(currKey, currValue);
+					return;
+				}
+
+				// Swap current with existing
+				Bucket<K, V> temp = table[lastPos];
 				table[lastPos] = new Bucket<>(currKey, currValue);
-				return;
+
+				// Prep for next iteration
+				currKey = temp.getBucKey();
+				currValue = temp.getValue();
+
+				// Calc next position
+				lastPos = (lastPos == hash1(currKey)) ? hash2(currKey) : hash1(currKey);
 			}
 
-			// Swap current with existing
-			Bucket<K, V> temp = table[lastPos];
-			table[lastPos] = new Bucket<>(currKey, currValue);
+			// Need to rehash
+			int oldCapacity = CAPACITY;
+			rehash();
+			rehashCount++;
 
-			// Prep for next iteration
-			currKey = temp.getBucKey();
-			currValue = temp.getValue();
+			// Reset position to hash1 for the displaced element
+			lastPos = hash1(currKey);
 
-			// Calc next position
-			lastPos = (lastPos == hash1(currKey)) ? hash2(currKey) : hash1(currKey);
+			// If table didn't grow, break to prevent infinite loop
+			if (CAPACITY <= oldCapacity) {
+				break;
+			}
 		}
 
-		// Rehash and try one more time with the displaced element
-		int oldCapacity = CAPACITY;
-		rehash();
-		// Only try to reinsert if the table actually grew
-		if (CAPACITY > oldCapacity) {
-			put(currKey, currValue);
+		// If exited the while loop, force a final placement
+		if (table[lastPos] == null) {
+			table[lastPos] = new Bucket<>(currKey, currValue);
 		}
 	}
 
